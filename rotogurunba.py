@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import MySQLdb
 import datetime
+import time
 
 def getdailyresults(month, day, year, playerdict, league):
     
@@ -176,11 +177,11 @@ def main():
     
     con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
 
-    year = 2015
+    year = 2014
     month = 12
     day = 11
 
-    for i in range(8,12):
+    for i in range(1,32):
         if i < 10:
             day = '0' + str(i)
         else:
@@ -188,7 +189,9 @@ def main():
         datestr = str(year) + '-' + str(month) + '-' + day
         for league in leagues:
             dailyresults[datestr] = getdailyresults(month, i, year, playerdict, league)
-    print dailyresults, dailyresults.keys()
+        print datestr, "complete"
+        time.sleep(1)
+    
     
     addtoDb(con, dailyresults)
     
