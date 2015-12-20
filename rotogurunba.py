@@ -152,7 +152,7 @@ def addtoDb(con, playerDict):
     
     for date in playerDict.keys():
         
-        query = "DELETE FROM rotoguru_gamelog WHERE day = %d" % (date)
+        query = "DELETE FROM rotoguru_gamelog WHERE day = %s" % (date)
         x = con.cursor()
         x.execute(query)
 
