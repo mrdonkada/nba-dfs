@@ -65,44 +65,132 @@ def getdailyresults(month, day, year, playerdict, league):
                 
                 playerdict[playerdata[-1]] = {}
                 playerdict[playerdata[-1]]['pos'] = playerdata[0]
-                playerdict[playerdata[-1]]['name'] = playerdata[1]
+                
+                playername = cleanName(playerdata[1])
+                playerdict[playerdata[-1]]['fullNm'] = playername[0]
+                playerdict[playerdata[-1]]['lastNm'] = playername[1]
+                playerdict[playerdata[-1]]['firstNm'] = playername[2]
+                
                 playerdict[playerdata[-1]]['start'] = playerdata[2]
                 playerdict[playerdata[-1]]['fdsal'] = ''
                 playerdict[playerdata[-1]]['dksal'] = ''
-                playerdict[playerdata[-1]][league + 'sal'] = playerdata[4]
+                playerdict[playerdata[-1]]['fdp'] = ''
+                playerdict[playerdata[-1]]['dkp'] = ''
+                
+                salary = cleanSal(playerdata[4])
+                playerdict[playerdata[-1]][league + 'sal'] = salary
+                playerdict[playerdata[-1]][league + 'p'] = playerdata[3]
                 playerdict[playerdata[-1]]['team'] = playerdata[5]
-                playerdict[playerdata[-1]]['opp'] = playerdata[6]
+                
+                location = homeaway(playerdata[6])
+                playerdict[playerdata[-1]]['homeaway'] = location[0]
+                playerdict[playerdata[-1]]['opp'] = location[1]
         
             else:
-                playerdict[playerdata[-1]][league + 'sal'] = playerdata[4]
+                salary = cleanSal(playerdata[4])
+                playerdict[playerdata[-1]][league + 'sal'] = salary
+                playerdict[playerdata[-1]][league + 'p'] = playerdata[3]
                 
         else:
             playerdict[playerdata[-1]] = {}
             playerdict[playerdata[-1]]['pos'] = playerdata[0]
-            playerdict[playerdata[-1]]['name'] = playerdata[1]
+            
+            playername = cleanName(playerdata[1])
+            playerdict[playerdata[-1]]['fullNm'] = playername[0]
+            playerdict[playerdata[-1]]['lastNm'] = playername[1]
+            playerdict[playerdata[-1]]['firstNm'] = playername[2]
+            
             playerdict[playerdata[-1]]['start'] = playerdata[2]
             playerdict[playerdata[-1]]['fdsal'] = ''
             playerdict[playerdata[-1]]['dksal'] = ''
-            playerdict[playerdata[-1]][league + 'sal'] = playerdata[4]
+            playerdict[playerdata[-1]]['fdp'] = ''
+            playerdict[playerdata[-1]]['dkp'] = ''
+            
+            salary = cleanSal(playerdata[4])
+            playerdict[playerdata[-1]][league + 'sal'] = salary
+            playerdict[playerdata[-1]][league + 'p'] = playerdata[3]
+            
             playerdict[playerdata[-1]]['team'] = playerdata[5]
-            playerdict[playerdata[-1]]['opp'] = playerdata[6]
+            
+            location = homeaway(playerdata[6])
+            playerdict[playerdata[-1]]['homeaway'] = location[0]
+            playerdict[playerdata[-1]]['opp'] = location[1]
     
     return playerdict
 
-leagues = ['fd', 'dk']    
-playerdict = {}
-dailyresults = {}
+##### Current Output:
+##### {'2015-12-09': {u'4026': {'lastNm': u'Stuckey', 'opp': u'gsw', 'dkp': u'10.5', 'fdp': u'9.4', 'firstNm': u'Rodney', 'homeaway': 'Home', 'pos': u'SG', 'dksal': u'5000', 'start': 0, 'team': u'ind', 'fullNm': u'Stuckey, Rodney', 'fdsal': u'4800'}, u'4024': {'lastNm': u'Splitter', 'opp': u'dal', 'dkp': u'0', 'fdp': u'0', 'firstNm': u'Tiago', 'homeaway': 'Away', 'pos': u'C', 'dksal': u'3000', 'start': 0, 'team': u'atl', 'fullNm': u'Splitter, Tiago', 'fdsal': u'3500'}, u'4023': {'lastNm': u'Smith', 'opp': u'den', 'dkp': u'17.5', 'fdp': u'16.9', 'firstNm': u'Jason', 'homeaway': 'Away', 'pos': u'PF', 'dksal': u'3200', 'start': 0, 'team': u'orl', 'fullNm': u'Smith, Jason', 'fdsal': u'3500'}, u'4020': {'lastNm': u'Sessions', 'opp': u'hou', 'dkp': u'18.25', 'fdp': u'18.2', 'firstNm': u'Ramon', 'homeaway': 'Home', 'pos': u'PG', 'dksal': u'3600', 'start': 0, 'team': u'was', 'fullNm': u'Sessions, Ramon', 'fdsal': u'3800'}
 
-year = 2015
-month = 12
-day = 11
 
-for i in range(8,12):
-    if i < 10:
-        day = '0' + str(i)
+def cleanName(name):
+    # takes in a name in format 'Smith, Jason' and returns a list of ['fullNm', 'lastNm', 'firstNm']
+    #(fullNm is in original format)
+    playername = []
+    playername = name.split(', ')
+    playername.insert(0, name)
+    
+    return playername
+    
+def homeaway(location):
+    # takes in the opposing team and based on the data returns a cleaned Opp and home/away
+    homeaway = []
+    homeaway = location.split(' ')
+    if homeaway[0] == 'v':
+        homeaway[0] = 'Home'
     else:
-        day = str(i)
-    datestr = str(year) + '-' + str(month) + '-' + day
-    for league in leagues:
-        dailyresults[datestr] = getdailyresults(month, i, year, playerdict, league)
-print dailyresults, dailyresults.keys()
+        homeaway[0] = 'Away'
+        
+    return homeaway
+    
+def cleanSal(salary):
+    # takes in salary of type '$5,000' and returns an integer '5000'
+    cleansal = salary.replace('$','').replace(',','')
+    return cleansal
+    
+def addtoDb(con, playerDict):
+    
+    
+    for date in playerDict.keys():
+        
+        query = "DELETE FROM rotoguru_gamelog WHERE day = %d" % (date)
+        x = con.cursor()
+        x.execute(query)
+
+        for key in playerDict[date].keys():
+            with con:
+                query = "INSERT INTO rotoguru_gamelog (day, player_id, playernm_full, playernm_last, playernm_first, team, opp\
+                        homeaway, pos, start, dksal, fdsal, dkp, fdp) \
+                        VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
+                                "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
+                    (day, key, playerDict[day][key]['fullNm'], playerDict[day][key]['lastNm'], playerDict[day][key]['firstNm'], playerDict[day][key]['team'], playerDict[day][key]['opp'], \
+                    playerDict[day][key]['homeaway'], playerDict[day][key]['pos'], playerDict[day][key]['start'], playerDict[day][key]['dksal'], playerDict[day][key]['fdsal'], playerDict[day][key]['dkp'], playerDict[day][key]['fdp'])
+                x = con.cursor()
+                x.execute(query)
+
+
+
+def main():
+    leagues = ['fd', 'dk']    
+    playerdict = {}
+    dailyresults = {}
+    
+    con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
+
+    year = 2015
+    month = 12
+    day = 11
+
+    for i in range(8,12):
+        if i < 10:
+            day = '0' + str(i)
+        else:
+            day = str(i)
+        datestr = str(year) + '-' + str(month) + '-' + day
+        for league in leagues:
+            dailyresults[datestr] = getdailyresults(month, i, year, playerdict, league)
+    print dailyresults, dailyresults.keys()
+    
+    addtoDb(con, dailyresults)
+    
+if __name__ == '__main__':
+    main()

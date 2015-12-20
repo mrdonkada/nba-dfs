@@ -58,12 +58,13 @@ def getflabsdata(month, day, year, model):
 def main():
     
     balesphan = 181330
+    balesphanNew = 209433
     
     month = 12
     day = 19
     year = 2015
     
-    getflabsdata(month, day, year, balesphan)
+    getflabsdata(month, day, year, balesphanNew)
     
 if __name__ == '__main__':
     main()
