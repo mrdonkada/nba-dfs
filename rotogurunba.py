@@ -157,17 +157,19 @@ def addtoDb(con, playerDict):
         x = con.cursor()
         x.execute(query)
 
-        for key in playerDict[date].keys():
-            with con:
-                query = "INSERT INTO rotoguru_gamelog (day, player_id, playernm_full, playernm_last, playernm_first, team, opp, \
-                        homeaway, pos, start, dksal, fdsal, dkp, fdp) \
-                        VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
-                                "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
-                    (date, key, playerDict[date][key]['fullNm'], playerDict[date][key]['lastNm'], playerDict[date][key]['firstNm'], playerDict[date][key]['team'], playerDict[date][key]['opp'], \
-                    playerDict[date][key]['homeaway'], playerDict[date][key]['pos'], playerDict[date][key]['start'], playerDict[date][key]['dksal'], playerDict[date][key]['fdsal'], playerDict[date][key]['dkp'], playerDict[date][key]['fdp'])
-                x = con.cursor()
-                x.execute(query)
-
+        try:
+            for key in playerDict[date].keys():
+                with con:
+                    query = "INSERT INTO rotoguru_gamelog (day, player_id, playernm_full, playernm_last, playernm_first, team, opp, \
+                            homeaway, pos, start, dksal, fdsal, dkp, fdp) \
+                            VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
+                                    "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
+                        (date, key, playerDict[date][key]['fullNm'], playerDict[date][key]['lastNm'], playerDict[date][key]['firstNm'], playerDict[date][key]['team'], playerDict[date][key]['opp'], \
+                        playerDict[date][key]['homeaway'], playerDict[date][key]['pos'], playerDict[date][key]['start'], playerDict[date][key]['dksal'], playerDict[date][key]['fdsal'], playerDict[date][key]['dkp'], playerDict[date][key]['fdp'])
+                    x = con.cursor()
+                    x.execute(query)
+        except:
+            continue
 
 
 def main():
@@ -177,21 +179,25 @@ def main():
     
     con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
 
-    year = 2014
-    month = 12
-    day = 11
+    year = 2015
+    month = '06'
 
-    for i in range(1,32):
+    for i in range(1,31):
+        playerdict = {}
         if i < 10:
             day = '0' + str(i)
         else:
             day = str(i)
         datestr = str(year) + '-' + str(month) + '-' + day
-        for league in leagues:
-            dailyresults[datestr] = getdailyresults(month, i, year, playerdict, league)
-        print datestr, "complete"
-        time.sleep(1)
-    
+        try:
+            for league in leagues:
+                dailyresults[datestr] = getdailyresults(month, i, year, playerdict, league)
+            print datestr, "complete"
+            time.sleep(1)
+        except:
+            print datestr, "unavailable"
+
+    print dailyresults
     
     addtoDb(con, dailyresults)
     
