@@ -162,8 +162,8 @@ def addtoDb(con, playerDict):
                         homeaway, pos, start, dksal, fdsal, dkp, fdp) \
                         VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                                 "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
-                    (date, key, playerDict[day][key]['fullNm'], playerDict[day][key]['lastNm'], playerDict[day][key]['firstNm'], playerDict[day][key]['team'], playerDict[day][key]['opp'], \
-                    playerDict[day][key]['homeaway'], playerDict[day][key]['pos'], playerDict[day][key]['start'], playerDict[day][key]['dksal'], playerDict[day][key]['fdsal'], playerDict[day][key]['dkp'], playerDict[day][key]['fdp'])
+                    (date, key, playerDict[date][key]['fullNm'], playerDict[date][key]['lastNm'], playerDict[date][key]['firstNm'], playerDict[date][key]['team'], playerDict[date][key]['opp'], \
+                    playerDict[date][key]['homeaway'], playerDict[date][key]['pos'], playerDict[date][key]['start'], playerDict[date][key]['dksal'], playerDict[date][key]['fdsal'], playerDict[date][key]['dkp'], playerDict[date][key]['fdp'])
                 x = con.cursor()
                 x.execute(query)
 
