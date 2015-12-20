@@ -158,7 +158,7 @@ def addtoDb(con, playerDict):
 
         for key in playerDict[date].keys():
             with con:
-                query = "INSERT INTO rotoguru_gamelog (day, player_id, playernm_full, playernm_last, playernm_first, team, opp\
+                query = "INSERT INTO rotoguru_gamelog (day, player_id, playernm_full, playernm_last, playernm_first, team, opp, \
                         homeaway, pos, start, dksal, fdsal, dkp, fdp) \
                         VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                                 "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
