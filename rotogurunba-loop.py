@@ -183,26 +183,25 @@ def main():
 
     year = today.year
     month = today.month
-    day = today.day - 1
+    day = today.day
     
-    if day < 10:
-        day = '0' + str(day)
-    else:
-        day = str(day)
-    
-    if month < 10:
-        month = '0' + str(month)
-    else:
-        month = str(month)
+    year = 2015
+    month = 12
 
-    datestr = str(year) + '-' + month + '-' + day
-    try:
-        for league in leagues:
-            dailyresults[datestr] = getdailyresults(month, i, year, playerdict, league)
-        print datestr, "complete"
-        time.sleep(1)
-    except:
-        print datestr, "unavailable"
+    for i in range(1,31):
+        playerdict = {}
+        if i < 10:
+            day = '0' + str(i)
+        else:
+            day = str(i)
+        datestr = str(year) + '-' + str(month) + '-' + day
+        try:
+            for league in leagues:
+                dailyresults[datestr] = getdailyresults(month, i, year, playerdict, league)
+            print datestr, "complete"
+            time.sleep(1)
+        except:
+            print datestr, "unavailable"
 
     print dailyresults
     
