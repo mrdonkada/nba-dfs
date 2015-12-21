@@ -66,28 +66,28 @@ def addtoDb(gamelist, datestr, con):
     
 def main():
     
-    today = datetime.date.today()
+    datelist = []
     
     con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
-
-    year = today.year
-    month = today.month
-    day = today.day - 1
     
-    if day < 10:
-        day = '0' + str(day)
-    else:
-        day = str(day)
+    year = 2015
+    for i in range(10,13):
+        for x in range(1,32):
+            if i < 10:
+                month = '0' + str(i)
+            else:
+                month = str(i)
+            if x < 10:
+                day = '0' + str(x)
+            else:
+                day = str(x)
+                
+            datestr = str(year) + "-" + month + "-" + day
+            datelist.append(datestr)
     
-    if month < 10:
-        month = '0' + str(month)
-    else:
-        month = str(month)
-
-    datestr = str(year) + '-' + month + '-' + day
-
-    addtoDb(playergamedata(), datestr, con)
-    print dates, "complete"
+    for dates in datelist:
+        addtoDb(playergamedata(), dates, con)
+        print dates, "complete"
     
 if __name__ == '__main__':
     main()
