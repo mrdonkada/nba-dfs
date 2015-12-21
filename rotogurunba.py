@@ -13,7 +13,7 @@ def getdailyresults(month, day, year, playerdict, league):
     datestr = str(year) + '-' + str(month) + '-' + str(day)
     ### Start with Fanduel results for the day
     
-    link = http://rotoguru1.com/cgi-bin/hyday.pl?mon=" + str(month) + "&day=" + str(day) + "&year=" + str(year) + "&game=" + league
+    link = "http://rotoguru1.com/cgi-bin/hyday.pl?mon=" + str(month) + "&day=" + str(day) + "&year=" + str(year) + "&game=" + league
     r = requests.get(link).text
 
     soup = BeautifulSoup(r)
