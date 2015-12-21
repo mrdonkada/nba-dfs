@@ -87,7 +87,7 @@ def main():
     datestr = str(year) + '-' + month + '-' + day
 
     addtoDb(playergamedata(), datestr, con)
-    print dates, "complete"
+    print datestr, "complete"
     
 if __name__ == '__main__':
     main()
