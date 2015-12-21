@@ -44,26 +44,23 @@ def addtoDb(gamelist, datestr, con):
     query = "DELETE FROM nba_gamelog WHERE day = %s" % (datestr)
     x = con.cursor()
     x.execute(query)
-    
-    try:
-        for key in playerdict[datestr].keys():
-            with con:
-                query = "INSERT INTO nba_gamelog (day, season_id, player_id, playernm_full, team_abbr, team, game_id, matchup, \
-                        wl, min, fgm, fga, fg_pct, fg3m, fg3a, \
-                        fg3_pct, ftm, fta, ft_pct, oreb, dreb, reb, \
-                        ast, stl, blk, tov, pf, pts, plus_minus) \
-                        VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
-                                "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
-                                "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
-                                "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
-                    (datestr, playerdict[datestr][key]['SEASON_ID'], key, playerdict[datestr][key]['PLAYER_NAME'], playerdict[datestr][key]['TEAM_ABBREVIATION'], playerdict[datestr][key]['TEAM_NAME'], playerdict[datestr][key]['GAME_ID'], playerdict[datestr][key]['MATCHUP'], \
-                    playerdict[datestr][key]['WL'], playerdict[datestr][key]['MIN'], playerdict[datestr][key]['FGM'], playerdict[datestr][key]['FGA'], playerdict[datestr][key]['FG_PCT'], playerdict[datestr][key]['FG3M'], playerdict[datestr][key]['FG3A'], \
-                    playerdict[datestr][key]['FG3_PCT'], playerdict[datestr][key]['FTM'], playerdict[datestr][key]['FTA'], playerdict[datestr][key]['FT_PCT'], playerdict[datestr][key]['OREB'], playerdict[datestr][key]['DREB'], playerdict[datestr][key]['REB'], \
-                    playerdict[datestr][key]['AST'], playerdict[datestr][key]['STL'], playerdict[datestr][key]['BLK'], playerdict[datestr][key]['TOV'], playerdict[datestr][key]['PF'], playerdict[datestr][key]['PTS'], playerdict[datestr][key]['PLUS_MINUS'])
-                x = con.cursor()
-                x.execute(query)
-    except:
-        continue
+
+    for key in playerdict[datestr].keys():
+        with con:
+            query = "INSERT INTO nba_gamelog (day, season_id, player_id, playernm_full, team_abbr, team, game_id, matchup, \
+                    wl, min, fgm, fga, fg_pct, fg3m, fg3a, \
+                    fg3_pct, ftm, fta, ft_pct, oreb, dreb, reb, \
+                    ast, stl, blk, tov, pf, pts, plus_minus) \
+                    VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
+                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
+                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
+                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
+                (datestr, playerdict[datestr][key]['SEASON_ID'], key, playerdict[datestr][key]['PLAYER_NAME'], playerdict[datestr][key]['TEAM_ABBREVIATION'], playerdict[datestr][key]['TEAM_NAME'], playerdict[datestr][key]['GAME_ID'], playerdict[datestr][key]['MATCHUP'], \
+                playerdict[datestr][key]['WL'], playerdict[datestr][key]['MIN'], playerdict[datestr][key]['FGM'], playerdict[datestr][key]['FGA'], playerdict[datestr][key]['FG_PCT'], playerdict[datestr][key]['FG3M'], playerdict[datestr][key]['FG3A'], \
+                playerdict[datestr][key]['FG3_PCT'], playerdict[datestr][key]['FTM'], playerdict[datestr][key]['FTA'], playerdict[datestr][key]['FT_PCT'], playerdict[datestr][key]['OREB'], playerdict[datestr][key]['DREB'], playerdict[datestr][key]['REB'], \
+                playerdict[datestr][key]['AST'], playerdict[datestr][key]['STL'], playerdict[datestr][key]['BLK'], playerdict[datestr][key]['TOV'], playerdict[datestr][key]['PF'], playerdict[datestr][key]['PTS'], playerdict[datestr][key]['PLUS_MINUS'])
+            x = con.cursor()
+            x.execute(query)
             
     return playerdict
     
@@ -87,11 +84,10 @@ def main():
                 
             datestr = str(year) + "-" + month + "-" + day
             datelist.append(datestr)
-            
-    print datelist
     
     for dates in datelist:
-        print addtoDb(playergamedata(), dates, con)
+        addtoDb(playergamedata(), dates, con)
+        print dates, "complete"
     
 if __name__ == '__main__':
     main()
