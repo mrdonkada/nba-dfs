@@ -13,7 +13,8 @@ def getdailyresults(month, day, year, playerdict, league):
     datestr = str(year) + '-' + str(month) + '-' + str(day)
     ### Start with Fanduel results for the day
     
-    r = requests.get("http://rotoguru1.com/cgi-bin/hyday.pl?mon=" + str(month) + "&day=" + str(day) + "&year=" + str(year) + "&game=" + league).text
+    link = http://rotoguru1.com/cgi-bin/hyday.pl?mon=" + str(month) + "&day=" + str(day) + "&year=" + str(year) + "&game=" + league
+    r = requests.get(link).text
 
     soup = BeautifulSoup(r)
     playerSet = soup.find_all("tr")
@@ -198,7 +199,7 @@ def main():
     datestr = str(year) + '-' + month + '-' + day
     try:
         for league in leagues:
-            dailyresults[datestr] = getdailyresults(month, i, year, playerdict, league)
+            dailyresults[datestr] = getdailyresults(month, day, year, playerdict, league)
         print datestr, "complete"
         time.sleep(1)
     except:
