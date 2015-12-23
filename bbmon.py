@@ -3,6 +3,7 @@
 import requests
 import csv
 import datetime
+import MySQLdb
 
 # Downloads the file into a csv
 # with open('2013-0.csv', 'wb') as ofile:
