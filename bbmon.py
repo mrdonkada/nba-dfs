@@ -64,7 +64,7 @@ def getplayerdata():
     
     return players
     
-def addtoDb(con, datestr, playerlist):
+def addtoDb(con, dates, playerlist):
     
     query = "DELETE FROM bbmon_proj WHERE day_id = %s" % (dates[1])
     x = con.cursor()
