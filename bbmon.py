@@ -76,7 +76,7 @@ def addtoDb(con, dates, playerlist):
                                             minutes, pts, fg3m, reb, ast, stl, blk, \
                                             tov, fg2m, ftm, ft_miss, fgm, fg_miss, dbl_dbl, \
                                             tpl_dbl, fd_sal, yahoo_sal, dk_sal, fd_pos, yahoo_pos, dk_pos) \
-                    VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
+                    VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                             "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                             "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                             "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
