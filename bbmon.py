@@ -28,8 +28,11 @@ def datestring(dt):
         month = str(month)
 
     datestr = str(year) + '-' + month + '-' + day
+    dayid = str(year) + month + day
     
-    return datestr
+    dates = [datestr, dayid]
+    
+    return dates
     
 def getplayerdata():
     
@@ -63,13 +66,13 @@ def getplayerdata():
     
 def addtoDb(con, datestr, playerlist):
     
-    query = "DELETE FROM bbmon_proj WHERE day = %s" % (datestr)
+    query = "DELETE FROM bbmon_proj WHERE day_id = %s" % (dates[1])
     x = con.cursor()
     x.execute(query)
     
     for i in playerlist:
         with con:
-            query = "INSERT INTO bbmon_proj (day, player_id, playernm_last, playernm_first, team, pos, opp, \
+            query = "INSERT INTO bbmon_proj (day, day_id, player_id, playernm_last, playernm_first, team, pos, opp, \
                                             minutes, pts, fg3m, reb, ast, stl, blk, \
                                             tov, fg2m, ftm, ft_miss, fgm, fg_miss, dbl_dbl, \
                                             tpl_dbl, fd_sal, yahoo_sal, dk_sal, fd_pos, yahoo_pos, dk_pos) \
@@ -77,7 +80,7 @@ def addtoDb(con, datestr, playerlist):
                             "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                             "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                             "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
-                (datestr, i['id'], i['last_name'], i['first_name'], i['team'], i['position'], i['opponent'], \
+                (dates[0], dates[1], i['id'], i['last_name'], i['first_name'], i['team'], i['position'], i['opponent'], \
                  i['minutes'], i['points'], i['threes'], i['rebounds'], i['assists'], i['steals'], i['blocks'], \
                  i['turnovers'], i['twos'], i['free throws'], i['free_throws_missed'], i['field goals'], i['field_goals_missed'], i['double doubles'], \
                  i['triple doubles'], i['price_fanduel'], i['price_yahoo'], i['price_draftkings'], i['positions_fanduel'], i['positions_yahoo'], i['positions_draftkings'])
@@ -91,9 +94,9 @@ def main():
     con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
     today = datetime.date.today()
     
-    datestr = datestring(today)
+    dates = datestring(today)
     # print getplayerdata()[:1]
-    addtoDb(con, datestr, getplayerdata())
+    addtoDb(con, dates, getplayerdata())
     
     return
     
