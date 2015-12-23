@@ -61,7 +61,7 @@ def main():
     balesphanNew = 209433
     
     month = 12
-    day = 19
+    day = 22
     year = 2015
     
     getflabsdata(month, day, year, balesphanNew)
