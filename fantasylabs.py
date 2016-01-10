@@ -11,7 +11,7 @@ import csv
 fieldnames = ['Score','Player_Name','Position','Team','Opposing_TeamFB','B2B','Salary','ImpPts','PtVal','MinutesProj','ProjPlusMinus','OppPlusMinus',\
 'Floor','AvgPts','Ceiling','Month_PPG','Season_PPG','Usage','UsageProj','PaceD','PER','Trend','MyTrends',\
 'Month_Salary_Change','Season_Salary_Change','Total','Pts','OppPts','Spread','Vegas','Run_Change','Season_Plus_Minus','Plus_Minus','Days_Between_games',\
-'OfficialPlusMinus','Refs','InjuryStatus','OppPlusMinusPct','Site_Salary','CeilingPct','Consistency','Month_Count','Season_Count','Confirmed','FloorPct','Pro_Pct','PtPerDPct',\
+'OfficialPlusMinus','Refs','InjuryStatus','OppPlusMinusPct','Site_Salary','CeilingPct','Consistency','Month_Count','Season_Count','Confirmed','FloorPct','Pro_Pct','PtPerDPct','FloorPtPerDPct',\
 'ProjPlusMinusPct','Upside','FantasyResultId','SpreadPct','ProjPct','Season_PPG_Percentile','Salary_Movement','MyTrends|custom','ActualPoints',\
 'IsLocked','Month_X2','Month_X1','Month_X0','Season_X2','Season_X1','Season_X0','SourceId','PlayerId','EventTeamId', 'PositionId', 'EventId']
 
@@ -61,7 +61,7 @@ def main():
     balesphanNew = 209433
     
     month = 12
-    day = 22
+    day = 30
     year = 2015
     
     getflabsdata(month, day, year, balesphanNew)

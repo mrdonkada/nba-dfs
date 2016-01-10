@@ -93,9 +93,8 @@ def main():
     
     con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
     today = datetime.date.today()
-    
     dates = datestring(today)
-    # print getplayerdata()[:1]
+    
     addtoDb(con, dates, getplayerdata())
     
     return
