@@ -60,9 +60,9 @@ def main():
     balesphan = 181330
     balesphanNew = 209433
     
-    month = 12
-    day = 30
-    year = 2015
+    month = 1
+    day = 11
+    year = 2016
     
     getflabsdata(month, day, year, balesphanNew)
     
