@@ -97,6 +97,7 @@ def addtoDb(con, dates, playerlist):
     for i in playerlist:
         season = '2016'
         fpts = fantasyValues(i)
+        print fpts
         with con:
             query = "INSERT INTO bbmon_proj (day, day_id, player_id, playernm_last, playernm_first, team, pos, opp, \
                                             minutes, pts, fg3m, reb, ast, stl, blk, \
