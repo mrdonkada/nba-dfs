@@ -50,11 +50,9 @@ def getplayerdata():
     teams = projData['teams']
     players = projData['players']
 
-    print dailyProj[0].keys()
     print teams.keys()
     print players.keys()
-    print teams
-    print players
+
 
 
     for player in dailyProj:
@@ -62,8 +60,11 @@ def getplayerdata():
         player['first_name'] = players[player['nba_player_id']]['first_name']
         player['name'] = players[player['nba_player_id']]['name']
         player['position'] = players[player['nba_player_id']]['position']
+        player['team'] = teams[player['nba_team_id']]['abbrev']
+        player['opp'] = teams[player['opponent_id']]['abbrev']
 
     print dailyProj[0]
+    print dailyProj[0].keys()
 
     return dailyProj
 
@@ -75,15 +76,24 @@ def addtoDb(con, dates, playerlist):
 
     for i in playerlist:
         with con:
-            query = "INSERT INTO bbmon_proj (day, day_id, player_id, playernm_last, playernm_first, team, pos, opp, \
-                                            minutes, pts, fg3m, reb, ast, stl, blk, \
-                                            tov, fg2m, ftm, ft_miss, fgm, fg_miss, dbl_dbl, \
-                                            tpl_dbl, fd_sal, yahoo_sal, dk_sal, fd_pos, yahoo_pos, dk_pos) \
-                    VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
+            query = "INSERT INTO numberfire_proj (day, day_id, season_id, game_id, player_id, playernm_last, playernm_first, \
+                                            playernm_full, team, pos, opp, minutes, pts, fgm, \
+                                            fga, ftm, fta, fg3m, fg3a, oreb, dreb, \
+                                            reb, ast, stl, blk, tov, nerd, efg, \
+                                            usg, drtg, game_start, game_play_prob, fd_sal, dk_sal, yahoo_sal, \
+                                            fdp, dkp, yhp, fd_ratio, dk_ratio, yahoo_ratio) \
+                    VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                             "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                             "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
-                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
-                (dates[0], dates[1], )
+                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
+                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
+                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
+                (dates[0], dates[1], i['season'], i['nba_game_id'], i['nba_player_id'], i['last_name'], i['first_name'], \
+                i['name'], i['team'], i['position'], i['opp'], i['minutes'], i['pts'], i['fgm'], \
+                i['fga'], i['ftm'], i['fta'], i['p3m'], i['p3a'], i['oreb'], i['dreb'], \
+                i['treb'], i['ast'], i['stl'], i['blk'], i['tov'], i['nerd'], i['efg'], \
+                i['usg'], i['drtg'], i['game_start'], i['game_play_probability'], i['fanduel_salary'], i['draft_kings_salary'], i['yahoo_salary'], \
+                i['fanduel_fp'], i['draft_kings_fp'], i['yahoo_fp'], i['fanduel_ratio'], i['draft_kings_ratio'], i['yahoo_ratio'])
             x = con.cursor()
             x.execute(query)
 
@@ -91,10 +101,12 @@ def addtoDb(con, dates, playerlist):
 
 def main():
 
-    # con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
+    con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
     today = datetime.date.today()
     dates = datestring(today)
-    getplayerdata()
+    
+    addtoDb(con, dates, getplayerdata())
+    # getplayerdata()
 
     return
 
