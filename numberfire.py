@@ -25,13 +25,13 @@ def datestring(dt):
 
     datestr = str(year) + '-' + month + '-' + day
     dayid = str(year) + month + day
-    
+
     dates = [datestr, dayid]
-    
+
     return dates
 
 def getplayerdata():
-    
+
     r = requests.get("http://www.numberfire.com/nba/fantasy/full-fantasy-basketball-projections").text
     soup = BeautifulSoup(r)
 
@@ -53,16 +53,26 @@ def getplayerdata():
     print dailyProj[0].keys()
     print teams.keys()
     print players.keys()
-    # print dailyProj[0]
-    
+    print teams
+    print players
+
+
+    for player in dailyProj:
+        player['last_name'] = players[player['nba_player_id']]['last_name']
+        player['first_name'] = players[player['nba_player_id']]['first_name']
+        player['name'] = players[player['nba_player_id']]['name']
+        player['position'] = players[player['nba_player_id']]['position']
+
+    print dailyProj[0]
+
     return dailyProj
-    
+
 def addtoDb(con, dates, playerlist):
-    
+
     query = "DELETE FROM numberfire_proj WHERE day_id = %s" % (dates[1])
     x = con.cursor()
     x.execute(query)
-    
+
     for i in playerlist:
         with con:
             query = "INSERT INTO bbmon_proj (day, day_id, player_id, playernm_last, playernm_first, team, pos, opp, \
@@ -76,17 +86,17 @@ def addtoDb(con, dates, playerlist):
                 (dates[0], dates[1], )
             x = con.cursor()
             x.execute(query)
-    
+
     return
-    
+
 def main():
-    
+
     # con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
     today = datetime.date.today()
     dates = datestring(today)
     getplayerdata()
-    
+
     return
-    
+
 if __name__ == '__main__':
     main()
