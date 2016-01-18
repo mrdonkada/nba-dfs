@@ -75,7 +75,7 @@ def getplayerdata():
 def fantasyValues(player):
 
     categories = ['points', 'rebounds', 'assists', 'blocks', 'steals', 'turnovers', 'threes', 'double doubles', 'triple doubles']
-
+    print player
     for i in categories:
         if player[i] == '':
             player[i] = 0.00
