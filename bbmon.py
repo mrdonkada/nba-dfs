@@ -95,20 +95,21 @@ def addtoDb(con, dates, playerlist):
     x.execute(query)
 
     for i in playerlist:
+        season = '2016'
         fpts = fantasyValues(i)
         with con:
             query = "INSERT INTO bbmon_proj (day, day_id, player_id, playernm_last, playernm_first, team, pos, opp, \
                                             minutes, pts, fg3m, reb, ast, stl, blk, \
                                             tov, fg2m, ftm, ft_miss, fgm, fg_miss, dbl_dbl, \
-                                            tpl_dbl, fd_sal, yahoo_sal, dk_sal, fd_pos, yahoo_pos, dk_pos, fdp, dkp, yhp) \
+                                            tpl_dbl, fd_sal, yahoo_sal, dk_sal, fd_pos, yahoo_pos, dk_pos, fdp, dkp, yhp, season) \
                     VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                             "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                             "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
-                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
+                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
                 (dates[0], dates[1], i['id'], i['last_name'], i['first_name'], i['team'], i['position'], i['opponent'], \
                  i['minutes'], i['points'], i['threes'], i['rebounds'], i['assists'], i['steals'], i['blocks'], \
                  i['turnovers'], i['twos'], i['free throws'], i['free_throws_missed'], i['field goals'], i['field_goals_missed'], i['double doubles'], \
-                 i['triple doubles'], i['price_fanduel'], i['price_yahoo'], i['price_draftkings'], i['positions_fanduel'], i['positions_yahoo'], i['positions_draftkings'], fpts['fdp'], fpts['dkp'], fpts['yhp'])
+                 i['triple doubles'], i['price_fanduel'], i['price_yahoo'], i['price_draftkings'], i['positions_fanduel'], i['positions_yahoo'], i['positions_draftkings'], fpts['fdp'], fpts['dkp'], fpts['yhp'], season)
             x = con.cursor()
             x.execute(query)
 
