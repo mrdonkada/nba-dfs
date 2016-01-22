@@ -101,7 +101,16 @@ def addtoDb(con, dates, playerlist):
 
 def main():
 
-    con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
+    local = True
+
+    if local == False:
+        fldr = 'nba-dfs/'
+        con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
+            
+    else:
+        fldr = ''
+        con = MySQLdb.connect('localhost', 'root', '', 'dfs-nba')            #### Localhost connection
+    
     today = datetime.date.today()
     dates = datestring(today)
     

@@ -180,7 +180,15 @@ def main():
     
     today = datetime.date.today()
     
-    con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
+    local = False
+
+    if local == False:
+        fldr = 'nba-dfs/'
+        con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
+            
+    else:
+        fldr = ''
+        con = MySQLdb.connect('localhost', 'root', '', 'dfs-nba')            #### Localhost connection
 
     year = today.year
     month = today.month

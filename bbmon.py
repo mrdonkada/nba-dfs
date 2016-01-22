@@ -45,12 +45,16 @@ def datestring(dt):
 def getplayerdata():
 
     cookies = {'ASP.NET_SessionId': '0dcma2pabd0tqdpwfseac5ij', 'RotoMonsterUserId': 'OQFkRaBrhi18wC9M7v4lsAi7q3Krk3Nusr/mW3b/s/g='}
-    r = requests.get(
-        url=('https://basketballmonster.com/Daily.aspx?exportcsv=6ldEjuwAcaR0fcSRnjvuxci[@]mg4Kol[@]fkswLqTAzm/c='),
-        cookies=cookies)
-
-    playerdata = r.text.split('\r\n')[:-1]          # Last item is blank list
-    # print test
+    
+    playerdata = []
+    
+    while len(playerdata) == 0:         # Make sure we are collecting data
+        r = requests.get(
+            url=('https://basketballmonster.com/Daily.aspx?exportcsv=6ldEjuwAcaR0fcSRnjvuxci[@]mg4Kol[@]fkswLqTAzm/c='),
+            cookies=cookies)
+    
+        playerdata = r.text.split('\r\n')[:-1]          # Last item is blank list
+    print type(playerdata)
     playerlist = []
     for line in playerdata:
         # print line, "\n"
@@ -96,6 +100,7 @@ def addtoDb(con, dates, playerlist):
 
     for i in playerlist:
         season = '22015'
+        print i
         fpts = fantasyValues(i)
         
         with con:
@@ -117,8 +122,17 @@ def addtoDb(con, dates, playerlist):
     return
 
 def main():
+    
+    local = True
 
-    con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
+    if local == False:
+        fldr = 'nba-dfs/'
+        con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
+            
+    else:
+        fldr = ''
+        con = MySQLdb.connect('localhost', 'root', '', 'dfs-nba')            #### Localhost connection
+
     today = datetime.date.today()
     dates = datestring(today)
 
