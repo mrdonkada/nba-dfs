@@ -101,7 +101,7 @@ def addtoDb(con, dates, playerlist):
 
 def main():
 
-    local = True
+    local = False
 
     if local == False:
         fldr = 'nba-dfs/'
