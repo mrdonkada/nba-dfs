@@ -54,7 +54,6 @@ def getplayerdata():
             cookies=cookies)
     
         playerdata = r.text.split('\r\n')[:-1]          # Last item is blank list
-    print type(playerdata)
     playerlist = []
     for line in playerdata:
         # print line, "\n"
@@ -100,7 +99,6 @@ def addtoDb(con, dates, playerlist):
 
     for i in playerlist:
         season = '22015'
-        print i
         fpts = fantasyValues(i)
         
         with con:
