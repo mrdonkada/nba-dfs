@@ -7,121 +7,58 @@ from bs4 import BeautifulSoup
 import datetime
 
 
-def getweek():
+
+def datestring(dt):
+
+    year = dt.year
+    month = dt.month
+    day = dt.day
+
+    if day < 10:
+        day = '0' + str(day)
+    else:
+        day = str(day)
+
+    if month < 10:
+        month = '0' + str(month)
+    else:
+        month = str(month)
+
+    datestr = str(year) + '-' + month + '-' + day
+    dayid = str(year) + month + day
+
+    dates = [datestr, dayid]
+
+    return dates
     
-    today = datetime.date.today()
-    week1 = datetime.date(2015, 9, 8)       #### Tuesday of Week 1
-    datedict = {}
-    
-    for i in range(1,18):
-        datedict[i] = week1 + datetime.timedelta(days=7*(i-1))      #### Week Starting Tuesday
-    
-    for key in datedict.keys():
-        if today >= datedict[key] and today < datedict[key + 1]:
-            weekNum = key
-            
-    return weekNum
-
-def consensus(fldr):
-
-    # Bring in team list    
-    teamlist = []
-    with open(fldr + 'team_list.csv', 'rU') as f:
-        w = csv.DictReader(f)
-        for row in w:
-            teamlist.append(row)
-    
-    #### Scrape oddsshark 
-    r = requests.get("http://www.oddsshark.com/nfl/consensus-picks").text
-
-    soup = BeautifulSoup(r)
-
-    data = soup.find('table', {'class': 'base-table'})
-
-    games = data.find_all('tr')
-
-    gameset = []
-
-    for rows in games[1:]:
-        temp = []
-        for item in rows.find_all('td'):
-            if '@' in item.text:
-                consensus = item.find('span', {'class': 'highlighted'}).text.strip()
-                temp.append(consensus)
-                teams = item.text.strip().split('@')
-                for team in teams:
-                    temp.append(team.strip())
-            elif '%' in item.text:
-                pct = int(item.text[:-1])/100.0
-                temp.append(pct)
-            else:
-                temp.append(item.text.strip())
-        gameset.append(temp)
-        temp = []
-
-    betlist = []
-    for game in gameset:
-        gamedict = {}
-        if game[0] == game[1]:
-            gamedict['team'] = game[1]
-            gamedict['opp'] = game[2]
-            gamedict['spread'] = float(game[3])
-            gamedict['consensus'] = round(game[4], 2)
-            betlist.append(gamedict)
-            gamedict = {}
-            gamedict['team'] = game[2]
-            gamedict['opp'] = game[1]
-            gamedict['spread'] = -float(game[3])
-            gamedict['consensus'] = round(1.0 - game[4], 2)
-            betlist.append(gamedict)
-        else:
-            gamedict['team'] = game[2]
-            gamedict['opp'] = game[1]
-            gamedict['spread'] = float(game[3])
-            gamedict['consensus'] = round(game[4], 2)
-            betlist.append(gamedict)
-            gamedict = {}
-            gamedict['team'] = game[1]
-            gamedict['opp'] = game[2]
-            gamedict['spread'] = -float(game[3])
-            gamedict['consensus'] = round(1.0 - game[4], 2)
-            betlist.append(gamedict)
-    
-    ##### Change team name to fit pinnacle
-    for line in betlist:
-        for team in teamlist:
-            if line['team'] == team['oddsshark_team']:
-                line['team'] = team['pinnacle_team']
-    
-    return betlist
-
-def getData():
+def getData(dates):
     
     r = requests.get("http://www.pinnaclesports.com/webapi/1.14/api/v1/GuestLines/NonLive/4/487").json()
     # League ID 487, SportID = 4 (NBA)
     
-    events = r["Leagues"][0]["Events"]
+    events = r['Leagues'][0]['Events']
     game = []
     gameList = []
     for event in events:
 
         if event['Totals'] and event['PeriodNumber'] == 0:      ### Only get Full Game Line (fix this later!)
-            total = float(event['Totals']['Min'])
-        
-            print '\n', event['EventId']
-            print 'Over Price', event['Totals']['OverPrice']
-            print 'Under Price', event['Totals']['UnderPrice']
-            print 'Total', event['Totals']['Min']
-
+            total = float(event['Totals']['Min'])               ### Game Total
             gamedate = event['DateAndTime'][:10]
             gametime = event['DateAndTime'][11:-1]        
-            game.append(event['EventId'])
-            game.append(gamedate)
-            game.append(gametime)
+            game.append(event['EventId'])                       # Event ID
+            game.append(gamedate)                               # Game Date
+            game.append(gametime)                               # Game Time
+            game.append(event['Totals']['Min'])
             game.append(event['Totals']['OverPrice'])
             game.append(event['Totals']['UnderPrice'])
-            game.append(event['Totals']['Min'])
-        
+            
+            # print '\neventID:', event['EventId']                        # Game ID
+            # print 'date:', gamedate
+            # print 'time:', gametime
+            # print 'total:', total
+            # print 'Over Price:', event['Totals']['OverPrice']    # Over Odds
+            # print 'Under Price:', event['Totals']['UnderPrice']  # Under Odds
+            
         
             for participants in event['Participants']:
                 spread = float(participants['Handicap']['Min'])
@@ -131,46 +68,99 @@ def getData():
                 game.append(participants['Handicap']['Min'])
                 game.append(participants['Handicap']['Price'])
                 game.append(teamTotal)
-                print 'Name', participants['Name']
-                print 'ML', participants['MoneyLine']
-                print 'Spread', participants['Handicap']['Min']
-                print 'Odds', participants['Handicap']['Price']
-                print teamTotal
-            gameList.append(game)
-            print game
+                # print 'Team:', participants['Name']                  # Team
+                # print 'ML:', participants['MoneyLine']               # Moneyline
+                # print 'Spread:', participants['Handicap']['Min']     # Spread
+                # print 'Odds:', participants['Handicap']['Price']     # Spread Odds
+                # print 'Team Total:', teamTotal                     # Team Total
+            if dates[0] == game[1]:
+                gameList.append(game)
         game = []
     return gameList
 
 
-def homeawaySplit(gameList, weekNum):
+def homeawaySplit(gameList, consensus):
     
-    hmorder = [11,6,12,13,14,15,7,8,9,10,3,4,5,0,1,2]
-    aworder = [6,11,7,8,9,10,12,13,14,15,3,4,5,0,1,2]
-
+    headers = ['HomeAway', 'game_id', 'date', 'time', 'total', 'team', 'ml', 'spread', 'odds', 'team_total', \
+    'opp', 'opp_ml', 'opp_spread', 'opp_odds', 'opp_total', 'over_price', 'under_price']
+    
+    aworder = [0,1,2,3,6,7,8,9,10,11,12,13,14,15,4,5]
+    hmorder = [0,1,2,3,11,12,13,14,15,6,7,8,9,10,4,5]
 
     holder = []
     gameinfo = []
+    teamlist = []
+    gameDict = {}
 
     for game in gameList:
         holder = [game[i] for i in hmorder]  # List method to put items into home team order
-        holder.insert(0, weekNum)
-        holder.insert(3, 'Home')             # Add 'Home' to home teams
+        holder.insert(0, 'Home')             # Add 'Home' to home teams
         gameinfo.append(holder)
         holder = [game[i] for i in aworder]  # List method to put items into away team order
-        holder.insert(0, weekNum)
-        holder.insert(3, 'Away')             # Add 'Away' to away teams
-        print holder
+        holder.insert(0, 'Away')             # Add 'Away' to away teams
         gameinfo.append(holder)
     
-    return gameinfo
 
-def linemovement(con, gameinfo, betlist, weekNum):
+    for team in gameinfo:
+        for header in headers:
+            gameDict[header] = team[headers.index(header)]
+        teamlist.append(gameDict)
+        gameDict = {}
+    
+    #### Add consensus % to list
+    for team in teamlist:
+        if team['team'] not in consensus.keys():
+            team['consensus'] = ''
+        else:
+            team['consensus'] = consensus[team['team']]
+    
+    return teamlist
+    
+def consensus():
+    
+    game = []
+    gameList = []
+    r = requests.get("http://www.oddsshark.com/nba/consensus-picks").text
+
+    soup = BeautifulSoup(r)
+
+    data = soup.find('table', {'class': 'consensus-table'})
+    
+    for rows in data.find_all('tr')[1:-1]:
+        if 'class' in rows.attrs.keys() and 'favoured' in rows.attrs['class']:
+            game.append('consensus')
+        for items in rows.find_all('td'):
+            if len(items.text.strip()) > 0:
+                game.append(items.text.strip())
+
+    gameList = [game[i:i+10] for i in range(0, len(game), 10)]
+    
+    bet_pct = {}
+    for game in gameList:
+        if game[0] == 'consensus':
+            pct = float(game[1][:-1])/100
+            bet_pct[game[3].split(' ', 1)[1]] = round(pct,2)
+            bet_pct[game[6].split(' ', 1)[1]] = round(1-pct,2)
+            # print game[3], pct, game[6], 1-pct
+        else:
+            pct = float(game[0][:-1])/100
+            bet_pct[game[2].split(' ', 1)[1]] = round(1-pct,2)
+            bet_pct[game[6].split(' ', 1)[1]] = round(pct,2)
+            # print game[2], 1-pct, game[6], pct
+
+    return bet_pct
+    
+    
+def linemovement(con, gameinfo, dates):
     # See if there is data in the table - if there is not, they are opening lines
+    
+    changes = ['total_chg', 'team_total_chg', 'opp_total_chg', 'spread_chg']
+    
     with con:
 
     # bring in past results
         cur = con.cursor()
-        cur.execute("SELECT * FROM pinnacle_odds WHERE week = %d" % (weekNum))
+        cur.execute("SELECT * FROM pinnacle_odds WHERE day = %s" % (dates[0]))
 
         rows = cur.fetchall()
         if len(rows) > 0:
@@ -181,15 +171,13 @@ def linemovement(con, gameinfo, betlist, weekNum):
     # If this is the first run, insert in placeholders and make the opening lines set to the current lines
     if firstPull:
         for game in gameinfo:
-            for i in range(0,7):
-                game.insert(15, 0.00)
-            game[15] = game[7] 
-            game[16] = game[5]
-            game[17] = game[14]
-            for team in betlist:
-                if game[1] == team['team']:
-                    game[21] = team['consensus']
-
+            for i in changes:
+                game[i] = 0.00
+            game['total_open'] = game['total']
+            game['team_total_open'] = game['team_total']
+            game['opp_total_open'] = game['opp_total']
+            game['spread_open'] = game['spread']
+            
     # If this isn't the first run, calculate the change and insert into the list
     else:
         holder = []
@@ -200,81 +188,61 @@ def linemovement(con, gameinfo, betlist, weekNum):
             pastresults.append(holder)
             holder = []
         print "\n\n", pastresults, "\n\n"
-        
-        for game in gameinfo:
-            for i in range(0,7):
-                game.insert(15, 0.00)
-            for team in betlist:
-                if game[1] == team['team']:
-                    game[21] = team['consensus']
                 
         for past in pastresults:
             for game in gameinfo:
-                if past[1] == game[1] and past[2] == game[2]:
-                    print past
-                    # game[15] = past[16]      # teamtotal_open
-                    # game[16] = past[17]      # spread_open
-                    # game[17] = past[18]      # total_open
-                    for i in range(4,15):       # replace with new odds
-                        past[i] = game[i]
-                    past[18] = float(game[7]) - float(past[15])      # teamtotal_chg
-                    past[19] = float(game[5]) - float(past[16])      # spread_chg
-                    past[20] = float(game[14]) - float(past[17])      # total_chg
-                    past[21] = game[21]
-        gameinfo = pastresults
+                if past[5] == game['team'] and past[6] == game['opp']:
+                    game['total_chg'] = float(past[19]) - float(game['total'])
+                    game['team_total_chg'] = float(past[20]) - float(game['team_total'])
+                    game['opp_total_chg'] = float(past[21]) - float(game['opp_total'])
+                    game['spread_chg'] = float(past[22]) - float(game['spread'])
         
     return gameinfo
+    
+def addtoDb(con, dates, gamelist):
 
-def addtoDb(con, gameinfo, weekNum):          ####### Add to database
-
-    query = "DELETE FROM pinnacle_odds WHERE week = %d" % (weekNum)
+    query = "DELETE FROM pinnacle_odds WHERE day_id = %s" % (dates[1])
     x = con.cursor()
     x.execute(query)
 
-    for row in gameinfo:
-        print row
+    for i in gamelist:
         with con:
-            query = "INSERT INTO pinnacle_odds (week, team, opp, home_away, ml, spread, odds, teamtotal, \
-                    opp_ml, opp_spread, opp_odds, opp_total, over_price, under_price, total, teamtotal_open, \
-                    spread_open, total_open, teamtotal_chg, spread_chg, total_chg, consensus, game_id, gamedate, gametime) \
-                    VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
-                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
-                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
-                (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], \
-                row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], \
-                row[19], row[20], row[21], row[22], row[23], row[24])
+            query = "INSERT INTO pinnacle_odds (day, day_id, game_id, time, home_away, team, opp, team_total, \
+                                            opp_total, total, ml, spread, odds, consensus, opp_ml, \
+                                            opp_spread, opp_odds, over_price, under_price, total_open, team_total_open, opp_total_open, \
+                                            spread_open, total_chg, team_total_chg, opp_total_chg, spread_chg) \
+                    VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
+                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
+                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
+                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
+                (i['date'], dates[1], i['game_id'], i['time'], i['HomeAway'], i['team'], i['opp'], i['team_total'], \
+                 i['opp_total'], i['total'], i['ml'], i['spread'], i['odds'], i['consensus'], i['opp_ml'], \
+                 i['opp_spread'], i['opp_odds'], i['over_price'], i['under_price'], i['total_open'], i['team_total_open'], i['opp_total_open'], \
+                 i['spread_open'], i['total_chg'], i['team_total_chg'], i['opp_total_chg'], i['spread_chg'])
             x = con.cursor()
             x.execute(query)
+    
+    print dates[0], "complete"
+    
     return
 
 def main():
     
     local = False
+
     if local == False:
-        fldr = 'nfl-dfs/'
+        fldr = 'nba-dfs/'
+        con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
+            
     else:
         fldr = ''
-    betlist = consensus(fldr)
-    print betlist
-    headers = ['team', 'opp', 'home_away', 'team_ml', 'team_spread', 'team_odds', 'team_total', 'opp_ml', 'opp_spread' \
-                'opp_odds', 'opp_total', 'overprice', 'underprice', 'total', 'gamedate', 'gametime']
+        con = MySQLdb.connect('localhost', 'root', '', 'dfs-nba')            #### Localhost connection
 
-    ##### Get week number
-    # f = open(fldr + 'weekinfo.txt', 'r')
-    # # f = open('weekinfo.txt', 'r')             ### Local
-    # ftext = f.read().split(',')
-    # weekNum = int(ftext[0])
-    weekNum = getweek()
+    today = datetime.date.today()
+    dates = datestring(today)
     
-    if local == True:
-        con = MySQLdb.connect('localhost', 'root', '', 'test')            #### Localhost connection
-    else:
-        con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nfl')
-    
-    gameList = getData()
-    gameinfo = linemovement(con, homeawaySplit(gameList, weekNum), betlist, weekNum)
-    addtoDb(con, gameinfo, weekNum)
-    
+    gameList = linemovement(con, homeawaySplit(getData(dates), consensus()), dates)
+    addtoDb(con, dates, gameList)
     
     
 if __name__ == '__main__':
