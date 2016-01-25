@@ -9,6 +9,7 @@ import json
 
 
 def playergamedata():
+    
     r = requests.get("http://stats.nba.com/stats/leaguegamelog?Counter=1000&Direction=DESC&LeagueID=00&PlayerOrTeam=P&Season=2015-16&SeasonType=Regular+Season&Sorter=PTS").json()
 
     headers = r['resultSets'][0]['headers']
@@ -23,6 +24,32 @@ def playergamedata():
         playerdict = {}
 
     return gamelist
+    
+def fantasyValues(player):
+
+    categories = ['PTS', 'REB', 'AST', 'BLK', 'STL', 'TOV', 'FG3M', 'DBLDBL', 'TPLDBL']
+    
+    counter = 0
+    for i in categories[:5]:
+        if player[i] >= 10:
+            counter += 1
+    
+    if counter == 2:
+        player['DBLDBL'] = 1
+    elif counter >= 3:
+        player['TPLDBL'] = 1
+    
+    for i in categories:
+        if player[i] == '' or i not in player.keys():
+            player[i] = 0.00
+
+    fdp = float(player['PTS']) + float(player['REB']) * 1.2 + float(player['AST']) * 1.5 + float(player['BLK']) * 2 + float(player['STL']) * 2 + (float(player['TOV']) * -1)
+    dkp = float(player['PTS']) + float(player['REB']) * 1.25 + float(player['AST']) * 1.5 + float(player['BLK']) * 2 + float(player['STL']) * 2 + (float(player['TOV']) * -0.5) + float(player['FG3M']) * 0.5 + float(player['DBLDBL']) * 1.5 + float(player['TPLDBL']) * 3
+    yhp = float(player['PTS']) + float(player['REB']) * 1.2 + float(player['AST']) * 1.5 + float(player['BLK']) * 2 + float(player['STL']) * 2 + (float(player['TOV']) * -1) + float(player['FG3M']) * 0.5
+
+    fpts = {'fdp': fdp, 'dkp': dkp, 'yhp': yhp}
+
+    return fpts
 
 def addtoDb(gamelist, datestr, con):
     
@@ -46,19 +73,22 @@ def addtoDb(gamelist, datestr, con):
     x.execute(query)
 
     for key in playerdict[datestr].keys():
+        
+        fpts = fantasyValues(playerdict[datestr][key])
+        
         with con:
             query = "INSERT INTO nba_gamelog (day, season_id, player_id, playernm_full, team_abbr, team, game_id, matchup, \
                     wl, min, fgm, fga, fg_pct, fg3m, fg3a, \
                     fg3_pct, ftm, fta, ft_pct, oreb, dreb, reb, \
-                    ast, stl, blk, tov, pf, pts, plus_minus) \
+                    ast, stl, blk, tov, pf, pts, plus_minus, fdp, dkp, yhp) \
                     VALUES ("'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                             "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
                             "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", \
-                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
+                            "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'", "'"%s"'")" % \
                 (datestr, playerdict[datestr][key]['SEASON_ID'], key, playerdict[datestr][key]['PLAYER_NAME'], playerdict[datestr][key]['TEAM_ABBREVIATION'], playerdict[datestr][key]['TEAM_NAME'], playerdict[datestr][key]['GAME_ID'], playerdict[datestr][key]['MATCHUP'], \
                 playerdict[datestr][key]['WL'], playerdict[datestr][key]['MIN'], playerdict[datestr][key]['FGM'], playerdict[datestr][key]['FGA'], playerdict[datestr][key]['FG_PCT'], playerdict[datestr][key]['FG3M'], playerdict[datestr][key]['FG3A'], \
                 playerdict[datestr][key]['FG3_PCT'], playerdict[datestr][key]['FTM'], playerdict[datestr][key]['FTA'], playerdict[datestr][key]['FT_PCT'], playerdict[datestr][key]['OREB'], playerdict[datestr][key]['DREB'], playerdict[datestr][key]['REB'], \
-                playerdict[datestr][key]['AST'], playerdict[datestr][key]['STL'], playerdict[datestr][key]['BLK'], playerdict[datestr][key]['TOV'], playerdict[datestr][key]['PF'], playerdict[datestr][key]['PTS'], playerdict[datestr][key]['PLUS_MINUS'])
+                playerdict[datestr][key]['AST'], playerdict[datestr][key]['STL'], playerdict[datestr][key]['BLK'], playerdict[datestr][key]['TOV'], playerdict[datestr][key]['PF'], playerdict[datestr][key]['PTS'], playerdict[datestr][key]['PLUS_MINUS'], fpts['fdp'], fpts['dkp'], fpts['yhp'])
             x = con.cursor()
             x.execute(query)
             
@@ -68,7 +98,7 @@ def main():
     
     today = datetime.date.today()
     
-    local = False
+    local = True
 
     if local == False:
         fldr = 'nba-dfs/'

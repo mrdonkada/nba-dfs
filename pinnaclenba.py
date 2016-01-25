@@ -145,6 +145,8 @@ def consensus():
         else:
             pct = float(game[0][:-1])/100
             bet_pct[game[2].split(' ', 1)[1]] = round(1-pct,2)
+            # print game[2], ":", game[6]
+            # print pct
             bet_pct[game[6].split(' ', 1)[1]] = round(pct,2)
             # print game[2], 1-pct, game[6], pct
 
