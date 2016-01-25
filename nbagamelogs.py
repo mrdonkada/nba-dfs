@@ -106,7 +106,7 @@ def main():
     
     today = datetime.date.today()
     
-    local = True
+    local = False
 
     if local == False:
         fldr = 'nba-dfs/'
