@@ -10,7 +10,8 @@ import json
 
 def playergamedata():
     
-    r = requests.get("http://stats.nba.com/stats/leaguegamelog?Counter=1000&Direction=DESC&LeagueID=00&PlayerOrTeam=P&Season=2015-16&SeasonType=Regular+Season&Sorter=PTS").json()
+    headerstr = {'User-Agent': 'Mozilla/5.0'}
+    r = requests.get("http://stats.nba.com/stats/leaguegamelog?Counter=1000&Direction=DESC&LeagueID=00&PlayerOrTeam=P&Season=2015-16&SeasonType=Regular+Season&Sorter=PTS", headers=headerstr).json()
 
     headers = r['resultSets'][0]['headers']
     gameset = r['resultSets'][0]['rowSet']
@@ -29,6 +30,15 @@ def fantasyValues(player):
 
     categories = ['PTS', 'REB', 'AST', 'BLK', 'STL', 'TOV', 'FG3M', 'DBLDBL', 'TPLDBL']
     
+    print player.keys()
+    
+    player['DBLDBL'] = 0
+    player['TPLDBL'] = 0
+    
+    for i in categories:
+        if player[i] == '' or i not in player.keys():
+            player[i] = 0.00
+            
     counter = 0
     for i in categories[:5]:
         if player[i] >= 10:
@@ -39,9 +49,7 @@ def fantasyValues(player):
     elif counter >= 3:
         player['TPLDBL'] = 1
     
-    for i in categories:
-        if player[i] == '' or i not in player.keys():
-            player[i] = 0.00
+    
 
     fdp = float(player['PTS']) + float(player['REB']) * 1.2 + float(player['AST']) * 1.5 + float(player['BLK']) * 2 + float(player['STL']) * 2 + (float(player['TOV']) * -1)
     dkp = float(player['PTS']) + float(player['REB']) * 1.25 + float(player['AST']) * 1.5 + float(player['BLK']) * 2 + float(player['STL']) * 2 + (float(player['TOV']) * -0.5) + float(player['FG3M']) * 0.5 + float(player['DBLDBL']) * 1.5 + float(player['TPLDBL']) * 3
@@ -98,7 +106,7 @@ def main():
     
     today = datetime.date.today()
     
-    local = False
+    local = True
 
     if local == False:
         fldr = 'nba-dfs/'
@@ -123,6 +131,8 @@ def main():
         month = str(month)
 
     datestr = str(year) + '-' + month + '-' + day
+    
+    # print playergamedata()
 
     addtoDb(playergamedata(), datestr, con)
     print datestr, "complete"
