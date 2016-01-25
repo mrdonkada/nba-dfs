@@ -30,8 +30,6 @@ def fantasyValues(player):
 
     categories = ['PTS', 'REB', 'AST', 'BLK', 'STL', 'TOV', 'FG3M', 'DBLDBL', 'TPLDBL']
     
-    print player.keys()
-    
     player['DBLDBL'] = 0
     player['TPLDBL'] = 0
     
