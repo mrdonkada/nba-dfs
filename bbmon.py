@@ -4,6 +4,7 @@ import requests
 import csv
 import datetime
 import MySQLdb
+import time
 
 
 #####
@@ -45,15 +46,15 @@ def datestring(dt):
 def getplayerdata():
 
     cookies = {'ASP.NET_SessionId': '0dcma2pabd0tqdpwfseac5ij', 'RotoMonsterUserId': 'OQFkRaBrhi18wC9M7v4lsAi7q3Krk3Nusr/mW3b/s/g='}
-    
+
     playerdata = []
-    
-    while len(playerdata) == 0:         # Make sure we are collecting data
+
+    while len(playerdata) < 5:         # Make sure we are collecting data
         r = requests.get(
             url=('https://basketballmonster.com/Daily.aspx?exportcsv=6ldEjuwAcaR0fcSRnjvuxci[@]mg4Kol[@]fkswLqTAzm/c='),
             cookies=cookies)
-    
         playerdata = r.text.split('\r\n')[:-1]          # Last item is blank list
+        print len(playerdata)
     playerlist = []
     for line in playerdata:
         # print line, "\n"
@@ -78,9 +79,8 @@ def getplayerdata():
 def fantasyValues(player):
 
     categories = ['points', 'rebounds', 'assists', 'blocks', 'steals', 'turnovers', 'threes', 'double doubles', 'triple doubles']
-    
     for i in categories:
-        if player[i] == '':
+        if player[i] == '' or i not in player.keys():
             player[i] = 0.00
 
     fdp = float(player['points']) + float(player['rebounds']) * 1.2 + float(player['assists']) * 1.5 + float(player['blocks']) * 2 + float(player['steals']) * 2 + (float(player['turnovers']) * -1)
@@ -100,7 +100,7 @@ def addtoDb(con, dates, playerlist):
     for i in playerlist:
         season = '22015'
         fpts = fantasyValues(i)
-        
+
         with con:
             query = "INSERT INTO bbmon_proj (day, day_id, player_id, playernm_last, playernm_first, team, pos, opp, \
                                             minutes, pts, fg3m, reb, ast, stl, blk, \
@@ -120,13 +120,13 @@ def addtoDb(con, dates, playerlist):
     return
 
 def main():
-    
+
     local = False
 
     if local == False:
         fldr = 'nba-dfs/'
         con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
-            
+
     else:
         fldr = ''
         con = MySQLdb.connect('localhost', 'root', '', 'dfs-nba')            #### Localhost connection
@@ -134,7 +134,18 @@ def main():
     today = datetime.date.today()
     dates = datestring(today)
 
-    addtoDb(con, dates, getplayerdata())
+    playerdata = getplayerdata()
+    print len(playerdata), "\n\n"
+    print playerdata
+
+    while 'points' not in playerdata[0].keys():
+        time.sleep(2)
+        playerdata = getplayerdata()
+        print len(playerdata), "\n\n"
+        print playerdata
+
+
+    addtoDb(con, dates, playerdata)
 
     return
 
