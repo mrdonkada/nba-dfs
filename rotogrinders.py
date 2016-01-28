@@ -7,8 +7,26 @@ import time
 import MySQLdb
 import datetime
 
+def security(site,fldr):
+    
+    info = []
+    myfile = fldr + 'myinfo.txt'
 
-def getdata():
+    siteDict = {}
+    with open(myfile) as f:
+        g = f.read().splitlines()
+        for row in g:
+            newlist = row.split(' ')
+            siteDict[newlist[0]] = {}
+            siteDict[newlist[0]]['username'] = newlist[1]
+            siteDict[newlist[0]]['password'] = newlist[2]
+                
+    info = [siteDict[site]['username'],siteDict[site]['password']]
+    
+    return info
+
+
+def getdata(info):
 
     headerList = ['week', 'playerID', 'playernm_full', 'playernm_first', 'playernm_last', 'Pos', 'GameInfo', \
     'dk_salary', 'dkp', 'dk_value', 'playerLink', 'fd_salary', 'fdp', 'fd_value']
@@ -18,7 +36,7 @@ def getdata():
     r = requests.get("https://rotogrinders.com/sign-in")
 
     headers = {'User-Agent': 'Mozilla/5.0'}
-    payload = {'username':'MurrDogg4','password':'tro2bro'}
+    payload = {'username':info[0],'password':info[1]}
 
     session = requests.Session()
     session.post('https://rotogrinders.com/sign-in',headers=headers,data=payload)
@@ -52,7 +70,15 @@ def getdata():
 
     return playerList
 
-print getdata()
+
+Local = True
+if Local == False:
+    fldr = 'nba-dfs/'
+else:
+    fldr = ''
+info = security('Rotogrinders',fldr)
+
+print getdata(info)
     
 # time.sleep(2)                               # Sleep for 2 seconds between data pulls
 #
