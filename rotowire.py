@@ -99,7 +99,7 @@ def main():
     dates = datestring(today)
     
     Local = False
-    if Local == True:
+    if Local == False:
         fldr = 'nba-dfs/'
     else:
         fldr = ''
