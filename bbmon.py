@@ -43,9 +43,9 @@ def datestring(dt):
 
     return dates
 
-def getplayerdata():
+def getplayerdata(info):
 
-    cookies = {'ASP.NET_SessionId': '0dcma2pabd0tqdpwfseac5ij', 'RotoMonsterUserId': 'OQFkRaBrhi18wC9M7v4lsAi7q3Krk3Nusr/mW3b/s/g='}
+    cookies = {'ASP.NET_SessionId': info[1], 'RotoMonsterUserId': info[0]}
 
     playerdata = []
 
@@ -118,6 +118,24 @@ def addtoDb(con, dates, playerlist):
             x.execute(query)
 
     return
+    
+def security(site,fldr):
+    
+    info = []
+    myfile = fldr + 'myinfo.txt'
+
+    siteDict = {}
+    with open(myfile) as f:
+        g = f.read().splitlines()
+        for row in g:
+            newlist = row.split(' ')
+            siteDict[newlist[0]] = {}
+            siteDict[newlist[0]]['username'] = newlist[1]
+            siteDict[newlist[0]]['password'] = newlist[2]
+                
+    info = [siteDict[site]['username'],siteDict[site]['password']]
+    
+    return info
 
 def main():
 
@@ -130,11 +148,13 @@ def main():
     else:
         fldr = ''
         con = MySQLdb.connect('localhost', 'root', '', 'dfs-nba')            #### Localhost connection
+        
+    info = security('BasketballMonster',fldr)
 
     today = datetime.date.today()
     dates = datestring(today)
 
-    playerdata = getplayerdata()
+    playerdata = getplayerdata(info)
     print len(playerdata), "\n\n"
     print playerdata
 
