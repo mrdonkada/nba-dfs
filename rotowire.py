@@ -75,10 +75,10 @@ def getplayerdata(date, info):
     
     return playerlist
     
-def security(site):
+def security(site,fldr):
     
     info = []
-    myfile = 'myinfo.txt'
+    myfile = fldr + 'myinfo.txt'
 
     siteDict = {}
     with open(myfile) as f:
@@ -98,8 +98,12 @@ def main():
     today = datetime.date.today()
     dates = datestring(today)
     
-    Local = True
-    info = security('Rotowire')
+    Local = False
+    if Local = True:
+        fldr = 'nba-dfs/'
+    else:
+        fldr = ''
+    info = security('Rotowire',fldr)
     print getplayerdata(dates[2], info)
     
 if __name__ == '__main__':
