@@ -1,3 +1,4 @@
+-- Shows average pts and variance to implied average over 5 games
 select
 c.nba_id,
 c.rotoguru_id,
