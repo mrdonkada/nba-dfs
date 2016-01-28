@@ -31,9 +31,9 @@ def datestring(dt):
 
     return dates
 
-def getplayerdata(date):
+def getplayerdata(date, info):
     
-    payload = {'username':'MurrDogg4', 'p1':'tro2bro', 'submit':'Login To RotoWire.com'}
+    payload = {'username':info[0], 'p1':info[1], 'submit':'Login To RotoWire.com'}
     
     session = requests.Session()
     session.post('http://www.rotowire.com/users/loginuser2.htm', data=payload)
@@ -75,11 +75,32 @@ def getplayerdata(date):
     
     return playerlist
     
+def security(site):
+    
+    info = []
+    myfile = 'myinfo.txt'
+
+    siteDict = {}
+    with open(myfile) as f:
+        g = f.read().splitlines()
+        for row in g:
+            newlist = row.split(' ')
+            siteDict[newlist[0]] = {}
+            siteDict[newlist[0]]['username'] = newlist[1]
+            siteDict[newlist[0]]['password'] = newlist[2]
+                
+    info = [siteDict[site]['username'],siteDict[site]['password']]
+    
+    return info
+    
 def main():
     
     today = datetime.date.today()
     dates = datestring(today)
-    print getplayerdata(dates[2])
+    
+    Local = True
+    info = security('Rotowire')
+    print getplayerdata(dates[2], info)
     
 if __name__ == '__main__':
     main()
