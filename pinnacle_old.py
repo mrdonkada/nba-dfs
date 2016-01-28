@@ -247,13 +247,38 @@ def addtoDb(con, gameinfo, weekNum):          ####### Add to database
             x.execute(query)
     return
 
+def security(site,fldr):
+    
+    info = []
+    myfile = fldr + 'myinfo.txt'
+
+    siteDict = {}
+    with open(myfile) as f:
+        g = f.read().splitlines()
+        for row in g:
+            newlist = row.split(' ')
+            siteDict[newlist[0]] = {}
+            siteDict[newlist[0]]['username'] = newlist[1]
+            siteDict[newlist[0]]['password'] = newlist[2]
+                
+    info = [siteDict[site]['username'],siteDict[site]['password']]
+    
+    return info
+
 def main():
     
     local = False
+
     if local == False:
-        fldr = 'nfl-dfs/'
+        fldr = 'nba-dfs/'
+        serverinfo = security('mysql', fldr)
+        con = MySQLdb.connect(host='mysql.server', user=serverinfo[0], passwd=serverinfo[1], db='MurrDogg4$dfs-nba')
+                    
     else:
         fldr = ''
+        con = MySQLdb.connect('localhost', 'root', '', 'dfs-nba')            #### Localhost connection
+    
+        
     betlist = consensus(fldr)
     print betlist
     headers = ['team', 'opp', 'home_away', 'team_ml', 'team_spread', 'team_odds', 'team_total', 'opp_ml', 'opp_spread' \
@@ -265,11 +290,6 @@ def main():
     # ftext = f.read().split(',')
     # weekNum = int(ftext[0])
     weekNum = getweek()
-    
-    if local == True:
-        con = MySQLdb.connect('localhost', 'root', '', 'test')            #### Localhost connection
-    else:
-        con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nfl')
     
     gameList = getData()
     gameinfo = linemovement(con, homeawaySplit(gameList, weekNum), betlist, weekNum)

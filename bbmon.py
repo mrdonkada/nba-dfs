@@ -143,7 +143,8 @@ def main():
 
     if local == False:
         fldr = 'nba-dfs/'
-        con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
+        serverinfo = security('mysql', fldr)
+        con = MySQLdb.connect(host='mysql.server', user=serverinfo[0], passwd=serverinfo[1], db='MurrDogg4$dfs-nba')
 
     else:
         fldr = ''

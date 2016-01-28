@@ -99,6 +99,24 @@ def addtoDb(gamelist, datestr, con):
             x.execute(query)
             
     return playerdict
+
+def security(site,fldr):
+    
+    info = []
+    myfile = fldr + 'myinfo.txt'
+
+    siteDict = {}
+    with open(myfile) as f:
+        g = f.read().splitlines()
+        for row in g:
+            newlist = row.split(' ')
+            siteDict[newlist[0]] = {}
+            siteDict[newlist[0]]['username'] = newlist[1]
+            siteDict[newlist[0]]['password'] = newlist[2]
+                
+    info = [siteDict[site]['username'],siteDict[site]['password']]
+    
+    return info
     
 def main():
     
@@ -108,12 +126,13 @@ def main():
 
     if local == False:
         fldr = 'nba-dfs/'
-        con = MySQLdb.connect(host='mysql.server', user='MurrDogg4', passwd='syracuse', db='MurrDogg4$dfs-nba')
-            
+        serverinfo = security('mysql', fldr)
+        con = MySQLdb.connect(host='mysql.server', user=serverinfo[0], passwd=serverinfo[1], db='MurrDogg4$dfs-nba')
+                    
     else:
         fldr = ''
         con = MySQLdb.connect('localhost', 'root', '', 'dfs-nba')            #### Localhost connection
-
+        
     year = today.year
     month = today.month
     day = today.day - 1
