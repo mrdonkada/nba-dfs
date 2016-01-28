@@ -160,7 +160,7 @@ def main():
 
     while 'points' not in playerdata[0].keys():
         time.sleep(2)
-        playerdata = getplayerdata()
+        playerdata = getplayerdata(info)
         print len(playerdata), "\n\n"
         print playerdata
 
